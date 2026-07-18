@@ -8,6 +8,7 @@ import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { SessionProvider, useSession } from '@/ctx';
+import { useNetworkMonitor } from '@/hooks/useNetworkMonitor';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
 const queryClient = new QueryClient({
@@ -21,6 +22,9 @@ function RootLayoutNav() {
 
   const isDark =
     themeMode === 'dark' || (themeMode === 'system' && systemScheme === 'dark');
+
+  // Start offline queue monitor
+  useNetworkMonitor();
 
   // Authenticated when either Supabase session or Firebase user exists
   const isAuthed = !!(session || firebaseUser);

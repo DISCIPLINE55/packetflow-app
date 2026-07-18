@@ -424,7 +424,7 @@ export default function CanvasScreen() {
     })();
   }, [projectId]);
 
-  // Auto-save + cache update
+  // Auto-save + cache update + offline queue
   useEffect(() => {
     if (!isDirty || !projectId) return;
     const timer = setTimeout(async () => {
@@ -435,7 +435,14 @@ export default function CanvasScreen() {
         clearDirty();
         setLastSaved(new Date());
       } catch {
+        // Offline — cache locally and enqueue for later sync
         await saveTopologyCache(projectId, projectName, { nodes, edges });
+        const { enqueueOfflineSave } = await import('@/db/offlineQueue');
+        await enqueueOfflineSave(projectId, { nodes, edges });
+        const { useOfflineStore } = await import('@/store/useOfflineStore');
+        const count = await (await import('@/db/offlineQueue')).getPendingCount();
+        useOfflineStore.getState().setPendingCount(count);
+        clearDirty();
       } finally {
         setIsSaving(false);
       }

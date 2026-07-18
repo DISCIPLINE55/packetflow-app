@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Bookmark, FolderOpen, Home, User } from 'lucide-react-native';
+import { Bookmark, BookOpen, FolderOpen, Home, User } from 'lucide-react-native';
 import { useColorScheme } from 'react-native';
 import { NAV_THEME } from '@/lib/theme';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -40,6 +40,13 @@ export default function TabsLayout() {
         options={{
           title: 'Projects',
           tabBarIcon: ({ color, size }: { color: string; size: number }) => <FolderOpen size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="learn"
+        options={{
+          title: 'Learn',
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <BookOpen size={size} color={color} />,
         }}
       />
       <Tabs.Screen
