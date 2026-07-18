@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "822177604972",
+    "project_id": "packetflow-app",
+    "storage_bucket": "packetflow-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822177604972:android:f21f675821f2ba152c3f49",
+        "android_client_info": {
+          "package_name": "com.packetflow.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_qTNbsE_1nILhSBJh_7C53x_0O4hczi8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
