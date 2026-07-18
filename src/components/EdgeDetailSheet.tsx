@@ -16,7 +16,7 @@ const PRESET_VLANS = [1, 10, 20, 30, 100, 200];
 
 export function EdgeDetailSheet({ edgeId, onClose }: EdgeDetailSheetProps) {
   const { edges, updateEdge, removeEdge, clearSelection } = useCanvasStore();
-  const edge = edges.find((e) => e.id === edgeId);
+  const edge = edges.find((e: import('@/types').NetworkEdge) => e.id === edgeId);
 
   const [vlanInput, setVlanInput] = useState(
     edge?.vlan_id !== undefined ? String(edge.vlan_id) : '',

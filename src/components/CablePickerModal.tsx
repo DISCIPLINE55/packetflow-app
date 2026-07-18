@@ -44,7 +44,7 @@ export function CablePickerModal({ visible, onPick, onCancel }: CablePickerModal
         onPress={onCancel}
       >
         {/* Stop propagation so tapping the sheet doesn't close it */}
-        <Pressable onPress={(e) => e.stopPropagation()}>
+        <Pressable onPress={(e: import('react-native').GestureResponderEvent) => e.stopPropagation()}>
           <Animated.View
             entering={SlideInDown.springify().damping(18)}
             exiting={SlideOutDown.duration(200)}

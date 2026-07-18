@@ -13,7 +13,7 @@ import Animated, { SlideInDown } from 'react-native-reanimated';
 import { DeviceIcon, getDeviceColor } from '@/components/DeviceIcon';
 import { DEVICE_CATALOG, DEVICE_CATEGORIES, TOPOLOGY_TEMPLATES } from '@/lib/constants';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import type { DeviceType } from '@/types';
+import type { DeviceCatalogItem, DeviceType } from '@/types';
 
 interface DeviceDrawerProps {
   onClose: () => void;
@@ -33,15 +33,15 @@ export function DeviceDrawer({ onClose, onAddDevice, onStartConnect }: DeviceDra
   const [saveName, setSaveName] = useState('');
   const [saveDesc, setSaveDesc] = useState('');
 
-  const loadTemplate = useCanvasStore((s) => s.loadTemplate);
-  const saveCanvasAsTemplate = useCanvasStore((s) => s.saveCanvasAsTemplate);
-  const deleteCustomTemplate = useCanvasStore((s) => s.deleteCustomTemplate);
-  const customTemplates = useCanvasStore((s) => s.customTemplates);
-  const nodeCount = useCanvasStore((s) => s.nodes.length);
+  const loadTemplate = useCanvasStore((s: any) => s.loadTemplate);
+  const saveCanvasAsTemplate = useCanvasStore((s: any) => s.saveCanvasAsTemplate);
+  const deleteCustomTemplate = useCanvasStore((s: any) => s.deleteCustomTemplate);
+  const customTemplates = useCanvasStore((s: any) => s.customTemplates);
+  const nodeCount = useCanvasStore((s: any) => s.nodes.length);
   const { panX, panY, zoom } = useCanvasStore();
 
   const toggleCategory = (cat: string) => {
-    setExpandedCategories((prev) => {
+    setExpandedCategories((prev: Set<string>) => {
       const next = new Set(prev);
       if (next.has(cat)) { next.delete(cat); } else { next.add(cat); }
       return next;
@@ -201,7 +201,7 @@ export function DeviceDrawer({ onClose, onAddDevice, onStartConnect }: DeviceDra
           <FlatList
             data={filtered ?? []}
             keyExtractor={(item) => item.type}
-            renderItem={({ item }) => renderDeviceItem(item)}
+            renderItem={({ item }: { item: DeviceCatalogItem }) => renderDeviceItem(item)}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 28 }}
             ListHeaderComponent={
@@ -271,7 +271,7 @@ export function DeviceDrawer({ onClose, onAddDevice, onStartConnect }: DeviceDra
                 <Star size={13} color="#8B5CF6" />
                 <Text style={{ color: '#8B5CF6', fontSize: 12, fontWeight: '700', letterSpacing: 0.5 }}>MY TEMPLATES</Text>
               </View>
-              {customTemplates.map((tmpl) => (
+              {customTemplates.map((tmpl: any) => (
                 <View
                   key={tmpl.id}
                   style={{
@@ -300,7 +300,7 @@ export function DeviceDrawer({ onClose, onAddDevice, onStartConnect }: DeviceDra
                     </Pressable>
                   </View>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-                    {tmpl.tags.slice(0, 4).map((tag) => (
+                    {tmpl.tags.slice(0, 4).map((tag: string) => (
                       <View key={tag} style={{ backgroundColor: '#8B5CF615', borderRadius: 20, paddingHorizontal: 7, paddingVertical: 2, borderWidth: 1, borderColor: '#8B5CF625' }}>
                         <Text style={{ color: '#A78BFA', fontSize: 10, fontWeight: '600' }}>{tag}</Text>
                       </View>

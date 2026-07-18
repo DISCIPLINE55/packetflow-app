@@ -129,7 +129,7 @@ export default function ProfileScreen() {
         <View className="flex-row px-5 gap-3 mb-6">
           {[
             { label: 'Projects', value: projects.length },
-            { label: 'Favorites', value: projects.filter((p) => p.is_favorite).length },
+            { label: 'Favorites', value: projects.filter((p: { is_favorite?: boolean }) => p.is_favorite).length },
             { label: 'Devices', value: profile?.total_devices ?? 0 },
           ].map((stat) => (
             <View key={stat.label} className="flex-1 bg-card border border-border rounded-2xl p-3 items-center" style={{ borderCurve: 'continuous' }}>

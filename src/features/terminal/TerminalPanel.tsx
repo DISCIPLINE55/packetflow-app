@@ -94,11 +94,11 @@ export function TerminalPanel({ onClose }: TerminalPanelProps) {
       <FlatList
         ref={flatListRef}
         data={lines}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item: { id: string; text: string; type: string }) => item.id}
         style={{ flex: 1, paddingHorizontal: 12 }}
         contentContainerStyle={{ paddingVertical: 8, gap: 1 }}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
+        renderItem={({ item }: { item: { id: string; text: string; type: string } }) => (
           <Text
             selectable
             style={{

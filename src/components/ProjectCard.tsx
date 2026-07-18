@@ -5,6 +5,7 @@ import type { DeviceType } from '@/types';
 import { DeviceIcon, getDeviceColor } from './DeviceIcon';
 
 interface ProjectCardProps {
+  key?: React.Key;
   name: string;
   updatedAt: string;
   deviceCount: number;

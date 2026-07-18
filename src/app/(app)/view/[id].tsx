@@ -33,7 +33,7 @@ const CANVAS_SIZE = 3200;
 const HALF = NODE_SIZE / 2;
 
 // ─── Edge renderer ────────────────────────────────────────────────────────────
-function ViewEdge({ edge, nodes }: { edge: NetworkEdge; nodes: NetworkNode[] }) {
+function ViewEdge({ edge, nodes }: { key?: React.Key; edge: NetworkEdge; nodes: NetworkNode[] }) {
   const src = nodes.find((n) => n.id === edge.source);
   const tgt = nodes.find((n) => n.id === edge.target);
   if (!src || !tgt) return null;
@@ -56,7 +56,7 @@ function ViewEdge({ edge, nodes }: { edge: NetworkEdge; nodes: NetworkNode[] }) 
 }
 
 // ─── Node renderer ────────────────────────────────────────────────────────────
-function ViewNode({ node }: { node: NetworkNode }) {
+function ViewNode({ node }: { key?: React.Key; node: NetworkNode }) {
   const color = getDeviceColor(node.type);
   return (
     <View
@@ -121,8 +121,8 @@ export default function ViewTopologyScreen() {
       .then((proj) => {
         if (!proj) throw new Error('Project not found');
         setProjectName(proj.name);
-        setNodes((proj.topology_data as any)?.nodes ?? []);
-        setEdges((proj.topology_data as any)?.edges ?? []);
+        setNodes(((proj.topology_data as any)?.nodes ?? []) as import('@/types').NetworkNode[]);
+        setEdges(((proj.topology_data as any)?.edges ?? []) as import('@/types').NetworkEdge[]);
         setUpdatedAt(proj.updated_at ? new Date(proj.updated_at).toLocaleString() : null);
       })
       .catch((e) => setError(e.message ?? 'Failed to load'))
@@ -131,14 +131,14 @@ export default function ViewTopologyScreen() {
 
   const pinch = Gesture.Pinch()
     .onStart(() => { savedScale.value = scale.value; })
-    .onUpdate((e) => {
+    .onUpdate((e: { scale: number }) => {
       scale.value = Math.min(Math.max(savedScale.value * e.scale, 0.15), 3);
     });
 
   const pan = Gesture.Pan()
     .minPointers(1).maxPointers(1)
     .onStart(() => { savedX.value = offsetX.value; savedY.value = offsetY.value; })
-    .onUpdate((e) => {
+    .onUpdate((e: { translationX: number; translationY: number }) => {
       offsetX.value = savedX.value + e.translationX;
       offsetY.value = savedY.value + e.translationY;
     });
@@ -210,7 +210,7 @@ export default function ViewTopologyScreen() {
           {[
             { label: 'Devices', value: nodes.length },
             { label: 'Links', value: edges.length },
-            { label: 'Types', value: new Set(nodes.map((n) => n.type)).size },
+            { label: 'Types', value: new Set(nodes.map((n: import('@/types').NetworkNode) => n.type)).size },
           ].map((s, i) => (
             <View key={s.label} style={{
               flex: 1, alignItems: 'center', paddingVertical: 8,
@@ -247,11 +247,11 @@ export default function ViewTopologyScreen() {
           <Animated.View style={{ flex: 1, overflow: 'hidden' }}>
             <Animated.View style={[{ width: CANVAS_SIZE, height: CANVAS_SIZE }, canvasStyle]}>
               {/* Edges first */}
-              {edges.map((e) => (
+              {edges.map((e: import('@/types').NetworkEdge) => (
                 <ViewEdge key={e.id} edge={e} nodes={nodes} />
               ))}
               {/* Nodes on top */}
-              {nodes.map((n) => (
+              {nodes.map((n: import('@/types').NetworkNode) => (
                 <ViewNode key={n.id} node={n} />
               ))}
             </Animated.View>

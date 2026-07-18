@@ -18,7 +18,7 @@ export default function EditProfileScreen() {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const initials = fullName.split(' ').map((w) => w[0]?.toUpperCase()).slice(0, 2).join('') || '?';
+  const initials = fullName.split(' ').map((w: string) => w[0]?.toUpperCase()).slice(0, 2).join('') || '?';
 
   const handleSave = async () => {
     if (!fullName.trim()) { setError('Name is required.'); return; }

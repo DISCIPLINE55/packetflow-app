@@ -99,6 +99,7 @@ function FlowDot({
   x1, y1, cpx, cpy, x2, y2,
   color, offset, duration, large,
 }: {
+  key?: React.Key;
   x1: number; y1: number; cpx: number; cpy: number; x2: number; y2: number;
   color: string; offset: number; duration: number; large?: boolean;
 }) {
@@ -194,7 +195,7 @@ function EdgeLine({
         const dotColor = simulationMode ? (PACKET_COLORS[packetType] ?? color) : color;
         const speed = simulationMode ? Math.max(500, dist * 2) : dotDuration;
         const count = simulationMode ? 5 : 3;
-        return Array.from({ length: count }, (_, i) => (
+        return Array.from({ length: count }, (_: unknown, i: number) => (
           <FlowDot
             key={i}
             x1={x1} y1={y1} cpx={cpx} cpy={cpy} x2={x2} y2={y2}
@@ -256,7 +257,7 @@ function DeviceNode({
 
   const dragGesture = Gesture.Pan()
     .onStart(() => { startX.value = tx.value; startY.value = ty.value; })
-    .onUpdate((e) => { tx.value = startX.value + e.translationX; ty.value = startY.value + e.translationY; })
+    .onUpdate((e: { translationX: number; translationY: number }) => { tx.value = startX.value + e.translationX; ty.value = startY.value + e.translationY; })
     .onEnd(() => { runOnJS(onDragEnd)(tx.value, ty.value); })
     .minDistance(5);
 
@@ -387,7 +388,7 @@ export default function CanvasScreen() {
           // Check for offline conflict: local cache newer than server?
           const cached = await loadTopologyCache(projectId);
           if (cached) {
-            const cacheNodeIds = new Set(cached.topology.nodes.map((n) => n.id));
+            const cacheNodeIds = new Set(cached.topology.nodes.map((n: NetworkNode) => n.id));
             const remoteNodeIds = new Set(remoteNodes.map((n) => n.id));
             const hasConflict =
               cached.topology.nodes.length !== remoteNodes.length ||
@@ -443,7 +444,7 @@ export default function CanvasScreen() {
   // Canvas pan/zoom gestures
   const pinchGesture = Gesture.Pinch()
     .onStart(() => { savedScale.value = canvasScale.value; })
-    .onUpdate((e) => {
+    .onUpdate((e: { scale: number }) => {
       const newScale = Math.min(Math.max(savedScale.value * e.scale, 0.25), 4);
       canvasScale.value = newScale;
     })
@@ -453,7 +454,7 @@ export default function CanvasScreen() {
     .minPointers(1)
     .maxPointers(1)
     .onStart(() => { savedX.value = canvasX.value; savedY.value = canvasY.value; })
-    .onUpdate((e) => {
+    .onUpdate((e: { translationX: number; translationY: number }) => {
       canvasX.value = savedX.value + e.translationX;
       canvasY.value = savedY.value + e.translationY;
     })
@@ -495,7 +496,7 @@ export default function CanvasScreen() {
     if (simulationMode) {
       if (!traceSource) {
         setTraceSource(nodeId);
-        addLine(`! Trace source: ${nodes.find((n) => n.id === nodeId)?.label ?? nodeId}`, 'system');
+        addLine(`! Trace source: ${nodes.find((n: NetworkNode) => n.id === nodeId)?.label ?? nodeId}`, 'system');
         addLine(`! Now tap the destination device…`, 'system');
         setTerminalExpanded(true);
         return;
@@ -508,7 +509,7 @@ export default function CanvasScreen() {
       setTraceRunning(true);
       const path = findTracePath(traceSource, nodeId, nodes, edges);
       if (!path) {
-        addLine(`! No path found from ${nodes.find((n) => n.id === traceSource)?.label ?? traceSource} to ${nodes.find((n) => n.id === nodeId)?.label ?? nodeId}`, 'error');
+        addLine(`! No path found from ${nodes.find((n: NetworkNode) => n.id === traceSource)?.label ?? traceSource} to ${nodes.find((n: NetworkNode) => n.id === nodeId)?.label ?? nodeId}`, 'error');
         addLine(`! Check that devices are connected with cables.`, 'error');
       } else {
         setTracePathEdgeIds(new Set(path.edgeIds));
@@ -542,8 +543,8 @@ export default function CanvasScreen() {
       return;
     }
     // Check cable compat
-    const srcNode = nodes.find((n) => n.id === connectingFromNodeId);
-    const tgtNode = nodes.find((n) => n.id === pendingTargetId);
+    const srcNode = nodes.find((n: NetworkNode) => n.id === connectingFromNodeId);
+    const tgtNode = nodes.find((n: NetworkNode) => n.id === pendingTargetId);
     if (srcNode && tgtNode) {
       const warning = getCableCompatWarning(srcNode.type, tgtNode.type, cableType);
       if (warning) {
@@ -574,8 +575,8 @@ export default function CanvasScreen() {
   const handleCompatConfirm = useCallback(() => {
     if (connectingFromNodeId && pendingTargetId && pendingCableType) {
       const edge = addEdge(connectingFromNodeId, pendingTargetId, pendingCableType);
-      const srcNode = nodes.find((n) => n.id === connectingFromNodeId);
-      const tgtNode = nodes.find((n) => n.id === pendingTargetId);
+      const srcNode = nodes.find((n: NetworkNode) => n.id === connectingFromNodeId);
+      const tgtNode = nodes.find((n: NetworkNode) => n.id === pendingTargetId);
       if (srcNode && tgtNode) {
         const traceLines = generateTraceOutput(srcNode, tgtNode, edge, nodes.length);
         traceLines.forEach((l) => addLine(l, 'output'));
@@ -803,7 +804,7 @@ export default function CanvasScreen() {
             <GridBackground showGrid={showGrid} />
 
             {/* Edges */}
-            {edges.map((edge) => (
+            {edges.map((edge: NetworkEdge) => (
               <EdgeLine
                 key={edge.id}
                 edge={edge}
@@ -818,7 +819,7 @@ export default function CanvasScreen() {
             ))}
 
             {/* Nodes */}
-            {nodes.map((node) => (
+            {nodes.map((node: NetworkNode) => (
               <DeviceNode
                 key={node.id}
                 node={node}
@@ -885,7 +886,7 @@ export default function CanvasScreen() {
             <View className="flex-row items-center gap-3 px-4 py-2" style={{ backgroundColor: 'rgba(251,191,36,0.95)' }}>
               <Radio size={15} color="#0F172A" />
               <Text style={{ color: '#0F172A', fontSize: 13, fontWeight: '800', letterSpacing: 0.2 }}>
-                {nodes.find((n) => n.id === traceSource)?.label ?? '?'} → Tap destination
+                {nodes.find((n: NetworkNode) => n.id === traceSource)?.label ?? '?'} → Tap destination
               </Text>
               <Pressable
                 onPress={() => setTraceSource(null)}
@@ -1306,17 +1307,17 @@ export default function CanvasScreen() {
 
             {/* Changed devices list */}
             {(() => {
-              const remoteIds = new Set(conflictRemote.nodes.map((n) => n.id));
-              const localIds = new Set(nodes.map((n) => n.id));
-              const added = nodes.filter((n) => !remoteIds.has(n.id)).slice(0, 4);
-              const removed = conflictRemote.nodes.filter((n) => !localIds.has(n.id)).slice(0, 4);
+              const remoteIds = new Set(conflictRemote.nodes.map((n: NetworkNode) => n.id));
+              const localIds = new Set(nodes.map((n: NetworkNode) => n.id));
+              const added = nodes.filter((n: NetworkNode) => !remoteIds.has(n.id)).slice(0, 4);
+              const removed = conflictRemote.nodes.filter((n: NetworkNode) => !localIds.has(n.id)).slice(0, 4);
               if (added.length === 0 && removed.length === 0) return null;
               return (
                 <View style={{ marginHorizontal: 16, marginBottom: 8, backgroundColor: '#1E293B', borderRadius: 12, padding: 12, gap: 4 }}>
-                  {added.map((n) => (
+                  {added.map((n: NetworkNode) => (
                     <Text key={n.id} style={{ color: '#4ade80', fontSize: 12 }}>+ {n.label ?? n.type}</Text>
                   ))}
-                  {removed.map((n) => (
+                  {removed.map((n: NetworkNode) => (
                     <Text key={n.id} style={{ color: '#f87171', fontSize: 12 }}>− {n.label ?? n.type}</Text>
                   ))}
                 </View>

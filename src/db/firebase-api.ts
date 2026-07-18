@@ -23,7 +23,7 @@ import type { Profile, Project, TopologyData } from '@/types';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function tsToIso(ts: unknown): string {
-  if (ts instanceof Timestamp) return ts.toDate().toISOString();
+  if (ts instanceof Timestamp) return (ts as import('firebase/firestore').Timestamp).toDate().toISOString();
   if (typeof ts === 'string') return ts;
   return new Date().toISOString();
 }
@@ -54,7 +54,7 @@ export async function fbFetchProjects(userId: string): Promise<Project[]> {
     limit(100),
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => docToProject(d.id, d.data() as Record<string, unknown>));
+  return snap.docs.map((d: import('firebase/firestore').QueryDocumentSnapshot) => docToProject(d.id, d.data() as Record<string, unknown>));
 }
 
 export async function fbFetchArchivedProjects(userId: string): Promise<Project[]> {
@@ -66,7 +66,7 @@ export async function fbFetchArchivedProjects(userId: string): Promise<Project[]
     limit(100),
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => docToProject(d.id, d.data() as Record<string, unknown>));
+  return snap.docs.map((d: import('firebase/firestore').QueryDocumentSnapshot) => docToProject(d.id, d.data() as Record<string, unknown>));
 }
 
 export async function fbFetchProjectById(id: string): Promise<Project | null> {

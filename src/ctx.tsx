@@ -23,12 +23,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<import('firebase/auth').User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const appState = useRef(AppState.currentState);
-  const backend = useSettingsStore((s) => s.backend);
+  const backend = useSettingsStore((s: { backend: string }) => s.backend);
 
   useEffect(() => {
     if (backend === 'firebase') {
       // Firebase auth state
-      const unsub = onAuthStateChanged(firebaseAuth, (user) => {
+      const unsub = onAuthStateChanged(firebaseAuth, (user: import('firebase/auth').User | null) => {
         setFirebaseUser(user);
         setSession(null);
         setIsLoading(false);
@@ -37,16 +37,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Supabase auth state
       setFirebaseUser(null);
-      supabase.auth.getSession().then(({ data: { session: s } }) => {
+      supabase.auth.getSession().then(({ data: { session: s } }: { data: { session: import('@supabase/supabase-js').Session | null } }) => {
         setSession(s);
         setIsLoading(false);
       });
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_: string, s: import('@supabase/supabase-js').Session | null) => {
         setSession(s);
       });
 
-      const appStateSubscription = AppState.addEventListener('change', async (nextState) => {
+      const appStateSubscription = AppState.addEventListener('change', async (nextState: string) => {
         if (Platform.OS !== 'web' && appState.current.match(/inactive|background/) && nextState === 'active') {
           const { error } = await supabase.auth.refreshSession();
           if (error) await supabase.auth.signOut();

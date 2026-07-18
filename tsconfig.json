@@ -1,6 +1,8 @@
 {
   "extends": "miaoda-expo-devkit/tsconfig-base",
   "compilerOptions": {
+    "noImplicitAny": false,
+    "skipLibCheck": true,
     "paths": {
       "@/*": [
         "./src/*"

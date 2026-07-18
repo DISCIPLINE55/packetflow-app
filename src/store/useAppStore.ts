@@ -16,32 +16,32 @@ interface AppStore {
   markAllRead: () => void;
 }
 
-export const useAppStore = create<AppStore>((set, get) => ({
+export const useAppStore = create<AppStore>((set: (partial: Partial<AppStore> | ((s: AppStore) => Partial<AppStore>)) => void, get: () => AppStore) => ({
   profile: null,
   projects: [],
   notifications: [],
   unreadCount: 0,
-  setProfile: (profile) => set({ profile }),
-  setProjects: (projects) => set({ projects }),
-  addProject: (p) => set((s) => ({ projects: [p, ...s.projects] })),
-  updateProject: (id, updates) =>
-    set((s) => ({
-      projects: s.projects.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+  setProfile: (profile: Profile | null) => set({ profile }),
+  setProjects: (projects: Project[]) => set({ projects }),
+  addProject: (p: Project) => set((s: AppStore) => ({ projects: [p, ...s.projects] })),
+  updateProject: (id: string, updates: Partial<Project>) =>
+    set((s: AppStore) => ({
+      projects: s.projects.map((p: Project) => (p.id === id ? { ...p, ...updates } : p)),
     })),
-  removeProject: (id) =>
-    set((s) => ({ projects: s.projects.filter((p) => p.id !== id) })),
-  setNotifications: (notifications) =>
-    set({ notifications, unreadCount: notifications.filter((n) => !n.is_read).length }),
-  markRead: (id) =>
-    set((s) => {
-      const notifications = s.notifications.map((n) =>
+  removeProject: (id: string) =>
+    set((s: AppStore) => ({ projects: s.projects.filter((p: Project) => p.id !== id) })),
+  setNotifications: (notifications: AppNotification[]) =>
+    set({ notifications, unreadCount: notifications.filter((n: AppNotification) => !n.is_read).length }),
+  markRead: (id: string) =>
+    set((s: AppStore) => {
+      const notifications = s.notifications.map((n: AppNotification) =>
         n.id === id ? { ...n, is_read: true } : n
       );
-      return { notifications, unreadCount: notifications.filter((n) => !n.is_read).length };
+      return { notifications, unreadCount: notifications.filter((n: AppNotification) => !n.is_read).length };
     }),
   markAllRead: () =>
-    set((s) => ({
-      notifications: s.notifications.map((n) => ({ ...n, is_read: true })),
+    set((s: AppStore) => ({
+      notifications: s.notifications.map((n: AppNotification) => ({ ...n, is_read: true })),
       unreadCount: 0,
     })),
 }));

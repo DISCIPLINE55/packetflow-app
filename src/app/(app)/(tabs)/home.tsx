@@ -115,7 +115,7 @@ export default function HomeScreen() {
             <View className="flex-row gap-3">
               <StatCard icon={<Network size={20} color="#3B82F6" />} label="Projects" value={projects.length} />
               <StatCard icon={<Cpu size={20} color="#8B5CF6" />} label="Devices" value={profile?.total_devices ?? 0} />
-              <StatCard icon={<Star size={20} color="#F59E0B" />} label="Favorites" value={projects.filter((p) => p.is_favorite).length} />
+              <StatCard icon={<Star size={20} color="#F59E0B" />} label="Favorites" value={projects.filter((p: { is_favorite?: boolean }) => p.is_favorite).length} />
             </View>
           </Animated.View>
 
@@ -156,13 +156,13 @@ export default function HomeScreen() {
               </View>
             ) : (
               <View className="gap-3">
-                {recentProjects.map((project) => (
+                {recentProjects.map((project: { id: string; name: string; updated_at: string; device_count: number; is_favorite?: boolean; topology_data?: { nodes?: Array<{ type: string }> } }) => (
                   <ProjectCard
                     key={project.id}
                     name={project.name}
                     updatedAt={project.updated_at}
                     deviceCount={project.device_count}
-                    isFavorite={project.is_favorite}
+                    isFavorite={project.is_favorite ?? false}
                     deviceTypes={(project.topology_data?.nodes?.slice(0, 3) ?? []).map((n: any) => n.type as DeviceType)}
                     onPress={() => router.push(`/(app)/canvas/${project.id}` as any)}
                     onMenuPress={() => {}}

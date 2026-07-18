@@ -6,7 +6,7 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function TabsLayout() {
   const systemScheme = useColorScheme();
-  const themeMode = useSettingsStore((s) => s.themeMode);
+  const themeMode = useSettingsStore((s: { themeMode: string }) => s.themeMode);
   const isDark = themeMode === 'dark' || (themeMode === 'system' && systemScheme === 'dark');
   const theme = isDark ? NAV_THEME.dark : NAV_THEME.light;
 
@@ -32,28 +32,28 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <Home size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="projects"
         options={{
           title: 'Projects',
-          tabBarIcon: ({ color, size }) => <FolderOpen size={size} color={color} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <FolderOpen size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="saved"
         options={{
           title: 'Saved',
-          tabBarIcon: ({ color, size }) => <Bookmark size={size} color={color} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <Bookmark size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>

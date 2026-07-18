@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AlertCircle, ArrowLeft, Bell, Check, CheckCircle, Info, Star } from 'lucide-react-native';
@@ -32,6 +33,7 @@ function NotifIcon({ type }: { type: string }) {
 }
 
 export default function NotificationsScreen() {
+  const insets = useSafeAreaInsets();
   const { session } = useSession();
   const { notifications, setNotifications, markRead, markAllRead } = useAppStore();
 
@@ -51,7 +53,7 @@ export default function NotificationsScreen() {
 
   const handleMarkAllRead = async () => {
     try {
-      for (const n of notifications.filter((n) => !n.is_read)) {
+      for (const n of notifications.filter((n: { is_read?: boolean }) => !n.is_read)) {
         await markNotificationRead(n.id);
       }
     } catch {}
@@ -69,12 +71,12 @@ export default function NotificationsScreen() {
     } catch { return ''; }
   };
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const unreadCount = notifications.filter((n: { is_read?: boolean }) => !n.is_read).length;
 
   return (
     <View className="flex-1 bg-background">
       <StatusBar style="auto" />
-      <View className="flex-row items-center justify-between px-4 pt-14 pb-4 border-b border-border bg-background">
+      <View className="flex-row items-center justify-between px-4 pb-4 border-b border-border bg-background" style={{ paddingTop: insets.top + 8 }}>
         <View className="flex-row items-center gap-3">
           <Pressable onPress={() => router.back()} className="w-8 h-8 rounded-full bg-card border border-border items-center justify-center active:opacity-70">
             <ArrowLeft size={18} color="#6B7280" />
@@ -106,9 +108,9 @@ export default function NotificationsScreen() {
       ) : (
         <FlatList
           data={notifications}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item: import('@/types').AppNotification) => item.id}
           contentInsetAdjustmentBehavior="automatic"
-          renderItem={({ item }) => (
+          renderItem={({ item }: { item: import('@/types').AppNotification }) => (
             <Pressable
               onPress={() => handleMarkRead(item.id)}
               className="flex-row items-start gap-3 px-5 py-4 active:bg-muted"

@@ -43,7 +43,7 @@ export default function SignInScreen() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const backend = useSettingsStore((s) => s.backend);
+  const backend = useSettingsStore((s: { backend: string }) => s.backend);
   const insets = useSafeAreaInsets();
 
   const handleLogin = async () => {
@@ -97,13 +97,13 @@ export default function SignInScreen() {
             <Text className="text-foreground text-sm font-medium">Password</Text>
             <View className="relative">
               <TextInput value={password} onChangeText={setPassword} placeholder="Enter your password" placeholderTextColor="#6B7280" secureTextEntry={!showPassword} className="bg-card border border-border rounded-xl px-4 py-3.5 text-foreground text-base pr-12" />
-              <Pressable onPress={() => setShowPassword((v) => !v)} className="absolute right-3 top-3.5">
+              <Pressable onPress={() => setShowPassword((v: boolean) => !v)} className="absolute right-3 top-3.5">
                 {showPassword ? <EyeOff size={20} color="#6B7280" /> : <Eye size={20} color="#6B7280" />}
               </Pressable>
             </View>
           </View>
           <View className="flex-row items-center justify-between">
-            <Pressable onPress={() => setRememberMe((v) => !v)} className="flex-row items-center gap-2">
+            <Pressable onPress={() => setRememberMe((v: boolean) => !v)} className="flex-row items-center gap-2">
               <View className={`w-4 h-4 rounded border ${rememberMe ? 'bg-primary border-primary' : 'border-border bg-card'}`}>
                 {rememberMe && <Text className="text-white text-xs text-center leading-4">✓</Text>}
               </View>

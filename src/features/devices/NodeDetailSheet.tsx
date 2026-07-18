@@ -46,7 +46,7 @@ const inputStyle = {
 
 export function NodeDetailSheet({ nodeId, onClose }: NodeDetailSheetProps) {
   const { nodes, updateNode } = useCanvasStore();
-  const node = nodes.find((n) => n.id === nodeId);
+  const node = nodes.find((n: import('@/types').NetworkNode) => n.id === nodeId);
 
   const [hostname, setHostname] = useState(node?.hostname ?? '');
   const [ipAddress, setIpAddress] = useState(node?.ip_address ?? '');
@@ -156,7 +156,7 @@ export function NodeDetailSheet({ nodeId, onClose }: NodeDetailSheetProps) {
         {/* Interfaces */}
         <View style={{ gap: 10 }}>
           <SectionHeader title="Interfaces" count={node.interfaces.length} />
-          {node.interfaces.map((iface) => (
+          {node.interfaces.map((iface: { id: string; name: string; status: string; description?: string }) => (
             <View
               key={iface.id}
               style={{

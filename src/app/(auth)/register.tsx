@@ -26,7 +26,7 @@ export default function RegisterScreen() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const backend = useSettingsStore((s) => s.backend);
+  const backend = useSettingsStore((s: { backend: string }) => s.backend);
 
   const handleRegister = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
@@ -118,7 +118,7 @@ export default function RegisterScreen() {
                 secureTextEntry={!showPassword}
                 className="bg-card border border-border rounded-xl px-4 py-3.5 text-foreground text-base pr-12"
               />
-              <Pressable onPress={() => setShowPassword((v) => !v)} className="absolute right-3 top-3.5">
+              <Pressable onPress={() => setShowPassword((v: boolean) => !v)} className="absolute right-3 top-3.5">
                 {showPassword ? <EyeOff size={20} color="#6B7280" /> : <Eye size={20} color="#6B7280" />}
               </Pressable>
             </View>
@@ -135,7 +135,7 @@ export default function RegisterScreen() {
                 secureTextEntry={!showConfirm}
                 className="bg-card border border-border rounded-xl px-4 py-3.5 text-foreground text-base pr-12"
               />
-              <Pressable onPress={() => setShowConfirm((v) => !v)} className="absolute right-3 top-3.5">
+              <Pressable onPress={() => setShowConfirm((v: boolean) => !v)} className="absolute right-3 top-3.5">
                 {showConfirm ? <EyeOff size={20} color="#6B7280" /> : <Eye size={20} color="#6B7280" />}
               </Pressable>
             </View>

@@ -17,7 +17,7 @@ const queryClient = new QueryClient({
 function RootLayoutNav() {
   const { session, firebaseUser, isLoading } = useSession();
   const systemScheme = useColorScheme();
-  const themeMode = useSettingsStore((s) => s.themeMode);
+  const themeMode = useSettingsStore((s: { themeMode: string }) => s.themeMode);
 
   const isDark =
     themeMode === 'dark' || (themeMode === 'system' && systemScheme === 'dark');

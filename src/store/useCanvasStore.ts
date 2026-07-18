@@ -67,7 +67,7 @@ function snapToGrid(val: number): number {
   return Math.round(val / GRID_SIZE) * GRID_SIZE;
 }
 
-export const useCanvasStore = create<CanvasStore>((set, get) => ({
+export const useCanvasStore = create<CanvasStore>((set: (p: Partial<CanvasStore> | ((s: CanvasStore) => Partial<CanvasStore>)) => void, get: () => CanvasStore) => ({
   nodes: [],
   edges: [],
   selectedNodeIds: [],
@@ -127,14 +127,14 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       interfaces,
     };
     (get() as any)._saveHistory();
-    set((s) => ({ nodes: [...s.nodes, node], isDirty: true }));
+    set((s: CanvasStore) => ({ nodes: [...s.nodes, node], isDirty: true }));
     return node;
   },
 
   updateNode: (id, updates) => {
     (get() as any)._saveHistory();
-    set((s) => ({
-      nodes: s.nodes.map((n) => (n.id === id ? { ...n, ...updates } : n)),
+    set((s: CanvasStore) => ({
+      nodes: s.nodes.map((n: NetworkNode) => (n.id === id ? { ...n, ...updates } : n)),
       isDirty: true,
     }));
   },
@@ -143,18 +143,18 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     const { snapToGrid: snap } = get();
     const x = snap ? snapToGrid(rawX) : rawX;
     const y = snap ? snapToGrid(rawY) : rawY;
-    set((s) => ({
-      nodes: s.nodes.map((n) => (n.id === id ? { ...n, x, y } : n)),
+    set((s: CanvasStore) => ({
+      nodes: s.nodes.map((n: NetworkNode) => (n.id === id ? { ...n, x, y } : n)),
       isDirty: true,
     }));
   },
 
   removeNode: (id) => {
     (get() as any)._saveHistory();
-    set((s) => ({
-      nodes: s.nodes.filter((n) => n.id !== id),
-      edges: s.edges.filter((e) => e.source !== id && e.target !== id),
-      selectedNodeIds: s.selectedNodeIds.filter((nid) => nid !== id),
+    set((s: CanvasStore) => ({
+      nodes: s.nodes.filter((n: NetworkNode) => n.id !== id),
+      edges: s.edges.filter((e: NetworkEdge) => e.source !== id && e.target !== id),
+      selectedNodeIds: s.selectedNodeIds.filter((nid: string) => nid !== id),
       isDirty: true,
     }));
   },
@@ -168,41 +168,41 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       status: 'active',
     };
     (get() as any)._saveHistory();
-    set((s) => ({ edges: [...s.edges, edge], isDirty: true }));
+    set((s: CanvasStore) => ({ edges: [...s.edges, edge], isDirty: true }));
     return edge;
   },
 
   removeEdge: (id) => {
     (get() as any)._saveHistory();
-    set((s) => ({
-      edges: s.edges.filter((e) => e.id !== id),
-      selectedEdgeIds: s.selectedEdgeIds.filter((eid) => eid !== id),
+    set((s: CanvasStore) => ({
+      edges: s.edges.filter((e: NetworkEdge) => e.id !== id),
+      selectedEdgeIds: s.selectedEdgeIds.filter((eid: string) => eid !== id),
       isDirty: true,
     }));
   },
 
   updateEdge: (id, updates) => {
-    set((s) => ({
-      edges: s.edges.map((e) => (e.id === id ? { ...e, ...updates } : e)),
+    set((s: CanvasStore) => ({
+      edges: s.edges.map((e: NetworkEdge) => (e.id === id ? { ...e, ...updates } : e)),
       isDirty: true,
     }));
   },
 
   selectNode: (id, multi = false) =>
-    set((s) => ({
+    set((s: CanvasStore) => ({
       selectedNodeIds: multi
         ? s.selectedNodeIds.includes(id)
-          ? s.selectedNodeIds.filter((n) => n !== id)
+          ? s.selectedNodeIds.filter((n: string) => n !== id)
           : [...s.selectedNodeIds, id]
         : [id],
       selectedEdgeIds: multi ? s.selectedEdgeIds : [],
     })),
 
   selectEdge: (id, multi = false) =>
-    set((s) => ({
+    set((s: CanvasStore) => ({
       selectedEdgeIds: multi
         ? s.selectedEdgeIds.includes(id)
-          ? s.selectedEdgeIds.filter((e) => e !== id)
+          ? s.selectedEdgeIds.filter((e: string) => e !== id)
           : [...s.selectedEdgeIds, id]
         : [id],
       selectedNodeIds: multi ? s.selectedNodeIds : [],
@@ -213,10 +213,10 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   deleteSelected: () => {
     const { selectedNodeIds, selectedEdgeIds } = get();
     (get() as any)._saveHistory();
-    set((s) => ({
-      nodes: s.nodes.filter((n) => !selectedNodeIds.includes(n.id)),
+    set((s: CanvasStore) => ({
+      nodes: s.nodes.filter((n: NetworkNode) => !selectedNodeIds.includes(n.id)),
       edges: s.edges.filter(
-        (e) =>
+        (e: NetworkEdge) =>
           !selectedEdgeIds.includes(e.id) &&
           !selectedNodeIds.includes(e.source) &&
           !selectedNodeIds.includes(e.target)
@@ -251,8 +251,8 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   setConnecting: (active, fromNodeId = null) =>
     set({ isConnecting: active, connectingFromNodeId: fromNodeId ?? null }),
 
-  toggleGrid: () => set((s) => ({ showGrid: !s.showGrid })),
-  toggleSnap: () => set((s) => ({ snapToGrid: !s.snapToGrid })),
+  toggleGrid: () => set((s: CanvasStore) => ({ showGrid: !s.showGrid })),
+  toggleSnap: () => set((s: CanvasStore) => ({ snapToGrid: !s.snapToGrid })),
 
   undo: () => {
     const { undoStack, nodes, edges, redoStack } = get();
@@ -316,7 +316,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       target: idMap[raw.target] ?? raw.target,
     }));
     (get() as any)._saveHistory();
-    set((s) => ({
+    set((s: CanvasStore) => ({
       nodes: [...s.nodes, ...nodes],
       edges: [...s.edges, ...edges],
       isDirty: true,
@@ -363,10 +363,10 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       },
     };
 
-    set((s) => ({ customTemplates: [...s.customTemplates, newTemplate] }));
+    set((s: CanvasStore) => ({ customTemplates: [...s.customTemplates, newTemplate] }));
   },
 
   deleteCustomTemplate: (id) => {
-    set((s) => ({ customTemplates: s.customTemplates.filter((t) => t.id !== id) }));
+    set((s: CanvasStore) => ({ customTemplates: s.customTemplates.filter((t: { id: string }) => t.id !== id) }));
   },
 }));

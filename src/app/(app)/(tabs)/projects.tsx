@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Archive, Copy, MoreVertical, Plus, Search, Star, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
@@ -28,6 +29,7 @@ import type { DeviceType } from '@/types';
 type TabType = 'recent' | 'shared';
 
 export default function ProjectsScreen() {
+  const insets = useSafeAreaInsets();
   const { session } = useSession();
   const { projects, setProjects, addProject, removeProject, updateProject } = useAppStore();
   const [activeTab, setActiveTab] = useState<TabType>('recent');
@@ -43,7 +45,7 @@ export default function ProjectsScreen() {
 
   useFocusEffect(useCallback(() => { refetch(); }, []));
 
-  const filtered = projects.filter((p) =>
+  const filtered = projects.filter((p: { name: string }) =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -64,7 +66,7 @@ export default function ProjectsScreen() {
   };
 
   const handleDuplicate = async (id: string) => {
-    const project = projects.find((p) => p.id === id);
+    const project = projects.find((p: { id: string }) => p.id === id);
     if (!project) return;
     try {
       const copy = await duplicateProject(project);
@@ -94,7 +96,7 @@ export default function ProjectsScreen() {
       <StatusBar style="auto" />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-5 pt-14 pb-4 border-b border-border bg-background">
+      <View className="flex-row items-center justify-between px-5 pb-4 border-b border-border bg-background" style={{ paddingTop: insets.top + 8 }}>
         <Text className="text-foreground text-2xl font-bold">Projects</Text>
         <Pressable
           onPress={handleCreate}
@@ -159,14 +161,14 @@ export default function ProjectsScreen() {
           contentInsetAdjustmentBehavior="automatic"
         >
           <View className="gap-3 py-2">
-            {filtered.map((project, idx) => (
+            {filtered.map((project: { id: string; name: string; updated_at: string; device_count: number; is_favorite?: boolean; topology_data?: { nodes?: Array<{ type: string }> } }, idx: number) => (
               <Animated.View key={project.id} entering={FadeIn.delay(idx * 40).duration(300)}>
                 <View className="relative">
                   <ProjectCard
                     name={project.name}
                     updatedAt={project.updated_at}
                     deviceCount={project.device_count}
-                    isFavorite={project.is_favorite}
+                    isFavorite={project.is_favorite ?? false}
                     deviceTypes={(project.topology_data?.nodes?.slice(0, 3) ?? []).map((n: any) => n.type as DeviceType)}
                     onPress={() => {
                       setMenuProjectId(null);
@@ -179,7 +181,7 @@ export default function ProjectsScreen() {
                   {menuProjectId === project.id && (
                     <View className="absolute right-4 top-16 z-50 bg-card border border-border rounded-xl shadow-lg overflow-hidden w-44">
                       <Pressable
-                        onPress={() => handleToggleFavorite(project.id, project.is_favorite)}
+                        onPress={() => handleToggleFavorite(project.id, project.is_favorite ?? false)}
                         className="flex-row items-center gap-3 px-4 py-3 active:bg-muted"
                       >
                         <Star size={16} color="#F59E0B" />

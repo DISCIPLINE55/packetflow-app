@@ -194,7 +194,7 @@ export default function OnboardingScreen() {
   const goToNext = () => {
     if (activeIndex < SLIDES.length - 1) {
       flatListRef.current?.scrollToIndex({ index: activeIndex + 1 });
-      setActiveIndex((i) => i + 1);
+      setActiveIndex((i: number) => i + 1);
     } else {
       router.replace('/(auth)/sign-in');
     }
@@ -222,8 +222,8 @@ export default function OnboardingScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         scrollEnabled={false}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+        keyExtractor={(item: { id: string }) => item.id}
+        renderItem={({ item }: { item: { id: string; title: string; subtitle: string; accentColor: string; description: string[]; icon: React.ReactNode } }) => (
           <View style={{ width, alignItems: 'center', paddingHorizontal: 32, paddingTop: 8 }}>
             {/* Illustration card */}
             <View style={{

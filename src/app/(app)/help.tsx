@@ -14,11 +14,11 @@ const faqs = [
   { q: 'How do I zoom and pan the canvas?', a: 'Use a two-finger pinch gesture to zoom in/out, and a single-finger drag to pan across the canvas. You can also use the zoom controls in the bottom toolbar.' },
 ];
 
-function FaqItem({ q, a }: { q: string; a: string }) {
+function FaqItem({ q, a }: { q: string; a: string; key?: React.Key }) {
   const [open, setOpen] = useState(false);
   return (
     <View className="bg-card border border-border rounded-2xl overflow-hidden" style={{ borderCurve: 'continuous' }}>
-      <Pressable onPress={() => setOpen((v) => !v)} className="flex-row items-center justify-between px-4 py-4 active:opacity-80">
+      <Pressable onPress={() => setOpen((v: boolean) => !v)} className="flex-row items-center justify-between px-4 py-4 active:opacity-80">
         <Text className="text-foreground font-medium text-sm flex-1 pr-3">{q}</Text>
         {open ? <ChevronUp size={18} color="#6B7280" /> : <ChevronDown size={18} color="#6B7280" />}
       </Pressable>
@@ -88,7 +88,7 @@ export default function HelpScreen() {
           {/* FAQ */}
           <View className="gap-3">
             <Text className="text-foreground font-semibold text-base">Frequently Asked Questions</Text>
-            {faqs.map((faq, i) => <FaqItem key={i} {...faq} />)}
+            {faqs.map((faq: { q: string; a: string }, i: number) => <FaqItem key={i} q={faq.q} a={faq.a} />)}
           </View>
 
           {/* Contact */}
