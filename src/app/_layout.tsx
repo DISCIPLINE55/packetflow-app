@@ -55,7 +55,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <SessionProvider>
           <RootLayoutNav />
-          <PortalHost />
+          <PortalHost {...({} as any)} />
         </SessionProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>

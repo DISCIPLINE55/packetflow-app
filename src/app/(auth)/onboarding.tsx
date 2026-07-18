@@ -223,7 +223,7 @@ export default function OnboardingScreen() {
         showsHorizontalScrollIndicator={false}
         scrollEnabled={false}
         keyExtractor={(item: { id: string }) => item.id}
-        renderItem={({ item }: { item: { id: string; title: string; subtitle: string; accentColor: string; description: string[]; icon: React.ReactNode } }) => (
+        renderItem={({ item }: { item: Slide }) => (
           <View style={{ width, alignItems: 'center', paddingHorizontal: 32, paddingTop: 8 }}>
             {/* Illustration card */}
             <View style={{

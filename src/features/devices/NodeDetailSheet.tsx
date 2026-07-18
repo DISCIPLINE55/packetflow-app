@@ -59,6 +59,23 @@ export function NodeDetailSheet({ nodeId, onClose }: NodeDetailSheetProps) {
   const color = getDeviceColor(node.type);
   const catalog = DEVICE_CATALOG.find((d) => d.type === node.type);
 
+  // Add Interface — generates a new interface entry on the node
+  const handleAddInterface = () => {
+    const idx = node.interfaces.length;
+    const rolePrefixes: Record<string, string> = {
+      router: 'GigabitEthernet', switch: 'FastEthernet', host: 'Ethernet',
+      firewall: 'inside', ap: 'wlan', server: 'eth',
+    };
+    const prefix = rolePrefixes[node.type] ?? 'eth';
+    const newIface = {
+      id: `iface_${idx}_${Date.now()}`,
+      name: `${prefix}${Math.floor(idx / 10)}/${idx % 10}`,
+      status: 'down' as const,
+      description: '',
+    };
+    updateNode(nodeId, { interfaces: [...node.interfaces, newIface] });
+  };
+
   const handleSave = () => {
     updateNode(nodeId, { hostname, ip_address: ipAddress, subnet_mask: subnetMask, gateway, dns, description });
     onClose();
@@ -156,7 +173,7 @@ export function NodeDetailSheet({ nodeId, onClose }: NodeDetailSheetProps) {
         {/* Interfaces */}
         <View style={{ gap: 10 }}>
           <SectionHeader title="Interfaces" count={node.interfaces.length} />
-          {node.interfaces.map((iface: { id: string; name: string; status: string; description?: string }) => (
+          {node.interfaces.map((iface: import('@/types').DeviceInterface) => (
             <View
               key={iface.id}
               style={{
@@ -198,7 +215,7 @@ export function NodeDetailSheet({ nodeId, onClose }: NodeDetailSheetProps) {
 
           {/* Add Interface */}
           <Pressable
-            onPress={() => {}}
+            onPress={handleAddInterface}
             className="active:opacity-60"
             style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

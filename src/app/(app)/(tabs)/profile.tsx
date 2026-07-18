@@ -11,7 +11,7 @@ import {
   LogOut,
   Settings,
 } from 'lucide-react-native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -60,12 +60,13 @@ export default function ProfileScreen() {
   const [signingOut, setSigningOut] = useState(false);
   const insets = useSafeAreaInsets();
 
-  const { isLoading } = useQuery({
+  const { isLoading, data: profileData } = useQuery({
     queryKey: ['profile', session?.user.id],
     queryFn: () => fetchProfile(session!.user.id),
     enabled: !!session?.user.id,
-    onSuccess: (data: Awaited<ReturnType<typeof fetchProfile>>) => { if (data) setProfile(data); },
-  } as any);
+  });
+
+  useEffect(() => { if (profileData) setProfile(profileData); }, [profileData]);
 
   const displayName = profile?.full_name || session?.user.email?.split('@')[0] || 'User';
   const initials = displayName.split(' ').map((w: string) => w[0]?.toUpperCase()).slice(0, 2).join('');

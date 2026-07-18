@@ -1,3 +1,5 @@
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft, Camera } from 'lucide-react-native';
@@ -6,6 +8,7 @@ import { KeyboardAvoidingView, Pressable, ScrollView, Text, TextInput, View } fr
 import { useSession } from '@/ctx';
 import { updateProfile } from '@/db/api';
 import { useAppStore } from '@/store/useAppStore';
+import { supabase } from '@/client/supabase';
 
 export default function EditProfileScreen() {
   const { session } = useSession();
@@ -14,11 +17,40 @@ export default function EditProfileScreen() {
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const [email] = useState(profile?.email ?? session?.user.email ?? '');
   const [bio, setBio] = useState(profile?.bio ?? '');
+  const [avatarUri, setAvatarUri] = useState<string | null>(profile?.avatar_url ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
   const initials = fullName.split(' ').map((w: string) => w[0]?.toUpperCase()).slice(0, 2).join('') || '?';
+
+  const handlePickAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') { setError('Photo library permission is required to change your avatar.'); return; }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    setAvatarUri(asset.uri);
+    // Upload to Supabase Storage
+    try {
+      const ext = asset.uri.split('.').pop() ?? 'jpg';
+      const path = `${session!.user.id}/avatar.${ext}`;
+      const response = await fetch(asset.uri);
+      const blob = await response.blob();
+      const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, { upsert: true, contentType: `image/${ext}` });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+      const updated = await updateProfile(session!.user.id, { avatar_url: publicUrl });
+      setProfile(updated);
+    } catch (e) {
+      setError('Avatar upload failed. Changes saved locally.');
+    }
+  };
 
   const handleSave = async () => {
     if (!fullName.trim()) { setError('Name is required.'); return; }
@@ -52,13 +84,18 @@ export default function EditProfileScreen() {
         {/* Avatar */}
         <View className="items-center">
           <View className="relative">
-            <View className="w-24 h-24 rounded-full bg-primary items-center justify-center">
-              <Text className="text-white text-3xl font-bold">{initials}</Text>
-            </View>
-            <Pressable onPress={() => {}} className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-card border border-border items-center justify-center">
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={{ width: 96, height: 96, borderRadius: 48 }} />
+            ) : (
+              <View className="w-24 h-24 rounded-full bg-primary items-center justify-center">
+                <Text className="text-white text-3xl font-bold">{initials}</Text>
+              </View>
+            )}
+            <Pressable onPress={handlePickAvatar} className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-card border border-border items-center justify-center active:opacity-70">
               <Camera size={14} color="#6B7280" />
             </Pressable>
           </View>
+          <Text className="text-muted-foreground text-xs mt-2">Tap camera to change photo</Text>
         </View>
 
         {error ? <Text className="text-destructive text-sm text-center">{error}</Text> : null}

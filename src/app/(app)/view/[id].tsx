@@ -188,17 +188,17 @@ export default function ViewTopologyScreen() {
             <Text style={{ color: '#475569', fontSize: 11 }}>Last updated {updatedAt}</Text>
           )}
         </View>
-        {/* Read-only badge */}
-        <View
+        {/* Open in Editor */}
+        <Pressable
+          onPress={() => router.replace(`/(app)/canvas/${projectId}` as any)}
           style={{
             flexDirection: 'row', alignItems: 'center', gap: 5,
-            backgroundColor: '#1E293B', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-            borderWidth: 1, borderColor: '#334155',
+            backgroundColor: '#2563EB', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6,
           }}
         >
-          <Lock size={11} color="#64748B" />
-          <Text style={{ color: '#64748B', fontSize: 11, fontWeight: '700' }}>Read-only</Text>
-        </View>
+          <Eye size={13} color="#fff" />
+          <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>Edit</Text>
+        </Pressable>
       </View>
 
       {/* Stats bar */}

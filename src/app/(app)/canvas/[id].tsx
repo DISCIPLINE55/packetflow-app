@@ -139,6 +139,7 @@ function EdgeLine({
   packetType,
   isTracePath,
 }: {
+  key?: React.Key;
   edge: NetworkEdge;
   nodes: NetworkNode[];
   showLabels: boolean;
@@ -241,6 +242,7 @@ function DeviceNode({
   onTap,
   onDragEnd,
 }: {
+  key?: React.Key;
   node: NetworkNode;
   selected: boolean;
   isConnecting: boolean;

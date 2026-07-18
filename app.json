@@ -2,7 +2,7 @@
   "expo": {
     "name": "PacketFlow Mobile App",
     "slug": "packetflow-app",
-    "version": "1.0.30",
+    "version": "1.0.31",
     "orientation": "portrait",
     "scheme": "packetflow",
     "icon": "./assets/icon.png",
@@ -26,6 +26,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      ["expo-image-picker", { "photosPermission": "Allow PacketFlow to select photos for your avatar.", "cameraPermission": "Allow PacketFlow to take a photo for your avatar." }],
       "expo-router",
       "expo-asset",
       "expo-sqlite",

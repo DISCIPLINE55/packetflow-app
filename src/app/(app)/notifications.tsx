@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AlertCircle, ArrowLeft, Bell, Check, CheckCircle, Info, Star } from 'lucide-react-native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { useSession } from '@/ctx';
 import { fetchNotifications, markNotificationRead } from '@/db/api';
 import { useAppStore } from '@/store/useAppStore';
+import { supabase } from '@/client/supabase';
 import type { AppNotification } from '@/types';
 
 function NotifIcon({ type }: { type: string }) {
@@ -37,14 +38,30 @@ export default function NotificationsScreen() {
   const { session } = useSession();
   const { notifications, setNotifications, markRead, markAllRead } = useAppStore();
 
-  const { isLoading, refetch } = useQuery({
+  const { isLoading, refetch, data: notifsData } = useQuery({
     queryKey: ['notifications', session?.user.id],
     queryFn: () => fetchNotifications(session!.user.id),
     enabled: !!session?.user.id,
-    onSuccess: (data: Awaited<ReturnType<typeof fetchNotifications>>) => setNotifications(data),
-  } as any);
+  });
+
+  useEffect(() => { if (notifsData) setNotifications(notifsData); }, [notifsData]);
 
   useFocusEffect(useCallback(() => { refetch(); }, []));
+
+  // Supabase Realtime — push new notifications into store without polling
+  useEffect(() => {
+    if (!session?.user.id) return;
+    const channel = supabase
+      .channel('notifications-realtime')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${session.user.id}`,
+      }, () => { refetch(); })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [session?.user.id]);
 
   const handleMarkRead = async (id: string) => {
     try { await markNotificationRead(id); } catch {}

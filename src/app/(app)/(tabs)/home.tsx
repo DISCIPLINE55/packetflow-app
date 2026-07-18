@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Bell, Clock, Cpu, Network, Plus, Star } from 'lucide-react-native';
-import React, { useCallback, useEffect } from 'react';
+import { Bell, Clock, Cpu, Network, Plus, Star, Trash2, Copy, Heart } from 'lucide-react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -16,7 +16,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ProjectCard } from '@/components/ProjectCard';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useSession } from '@/ctx';
-import { createProject, fetchProfile, fetchProjects } from '@/db/api';
+import { createProject, fetchProfile, fetchProjects, updateProjectMeta, deleteProject, duplicateProject } from '@/db/api';
 import { useAppStore } from '@/store/useAppStore';
 import type { DeviceType } from '@/types';
 
@@ -45,6 +45,7 @@ export default function HomeScreen() {
   const { session } = useSession();
   const { profile, projects, setProfile, setProjects, addProject } = useAppStore();
   const insets = useSafeAreaInsets();
+  const [menuProjectId, setMenuProjectId] = useState<string | null>(null);
 
   const { data: profileData, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', session?.user.id],
@@ -71,6 +72,32 @@ export default function HomeScreen() {
       const p = await createProject(`Network ${Date.now().toString().slice(-4)}`);
       addProject(p);
       router.push(`/(app)/canvas/${p.id}` as any);
+    } catch (e) {}
+  };
+
+  const handleToggleFavorite = async (id: string, current: boolean) => {
+    setMenuProjectId(null);
+    try {
+      await updateProjectMeta(id, { is_favorite: !current });
+      setProjects(projects.map((p: { id: string }) => p.id === id ? { ...p, is_favorite: !current } : p) as any);
+    } catch (e) {}
+  };
+
+  const handleDuplicate = async (id: string) => {
+    setMenuProjectId(null);
+    try {
+      const src = projects.find((p: { id: string }) => p.id === id);
+      if (!src) return;
+      const copy = await duplicateProject(src as any);
+      addProject(copy);
+    } catch (e) {}
+  };
+
+  const handleDelete = async (id: string) => {
+    setMenuProjectId(null);
+    try {
+      await deleteProject(id);
+      setProjects(projects.filter((p: { id: string }) => p.id !== id) as any);
     } catch (e) {}
   };
 
@@ -127,7 +154,7 @@ export default function HomeScreen() {
                 <QuickActionItem icon={<Plus size={22} color="#3B82F6" />} label="New Project" onPress={handleCreateProject} />
                 <QuickActionItem icon={<Clock size={22} color="#8B5CF6" />} label="Recent" onPress={() => router.push('/(app)/(tabs)/projects' as any)} />
                 <QuickActionItem icon={<Star size={22} color="#F59E0B" />} label="Favorites" onPress={() => router.push('/(app)/(tabs)/saved' as any)} />
-                <QuickActionItem icon={<Network size={22} color="#22C55E" />} label="Templates" onPress={() => {}} />
+                <QuickActionItem icon={<Network size={22} color="#22C55E" />} label="Templates" onPress={() => router.push('/(app)/(tabs)/projects' as any)} />
               </View>
             </View>
           </Animated.View>
@@ -157,16 +184,33 @@ export default function HomeScreen() {
             ) : (
               <View className="gap-3">
                 {recentProjects.map((project: { id: string; name: string; updated_at: string; device_count: number; is_favorite?: boolean; topology_data?: { nodes?: Array<{ type: string }> } }) => (
-                  <ProjectCard
-                    key={project.id}
-                    name={project.name}
-                    updatedAt={project.updated_at}
-                    deviceCount={project.device_count}
-                    isFavorite={project.is_favorite ?? false}
-                    deviceTypes={(project.topology_data?.nodes?.slice(0, 3) ?? []).map((n: any) => n.type as DeviceType)}
-                    onPress={() => router.push(`/(app)/canvas/${project.id}` as any)}
-                    onMenuPress={() => {}}
-                  />
+                  <View key={project.id}>
+                    <ProjectCard
+                      name={project.name}
+                      updatedAt={project.updated_at}
+                      deviceCount={project.device_count}
+                      isFavorite={project.is_favorite ?? false}
+                      deviceTypes={(project.topology_data?.nodes?.slice(0, 3) ?? []).map((n: any) => n.type as DeviceType)}
+                      onPress={() => router.push(`/(app)/canvas/${project.id}` as any)}
+                      onMenuPress={() => setMenuProjectId(menuProjectId === project.id ? null : project.id)}
+                    />
+                    {menuProjectId === project.id && (
+                      <View className="bg-card border border-border rounded-xl mt-1 overflow-hidden" style={{ borderCurve: 'continuous' }}>
+                        <Pressable onPress={() => handleToggleFavorite(project.id, project.is_favorite ?? false)} className="flex-row items-center gap-3 px-4 py-3 active:bg-muted">
+                          <Heart size={16} color="#F59E0B" />
+                          <Text className="text-foreground text-sm">{project.is_favorite ? 'Remove Favorite' : 'Add to Favorites'}</Text>
+                        </Pressable>
+                        <Pressable onPress={() => handleDuplicate(project.id)} className="flex-row items-center gap-3 px-4 py-3 active:bg-muted border-t border-border">
+                          <Copy size={16} color="#6B7280" />
+                          <Text className="text-foreground text-sm">Duplicate</Text>
+                        </Pressable>
+                        <Pressable onPress={() => handleDelete(project.id)} className="flex-row items-center gap-3 px-4 py-3 active:bg-muted border-t border-border">
+                          <Trash2 size={16} color="#EF4444" />
+                          <Text className="text-destructive text-sm">Delete</Text>
+                        </Pressable>
+                      </View>
+                    )}
+                  </View>
                 ))}
               </View>
             )}
